@@ -1,0 +1,163 @@
+// Name: Robert Jacobs 30018755
+// Date: NOT YET COMPLETE
+// Project: Environment Controller / Version 1
+// Description: Records, uses and displays temperature, humidity and light values alongside user notifications when certain thresholds have been exceeded.
+
+// DHT Library to use the DHT11 temp and humidity sensor.
+#include <DHT.h>
+#include <DHT_U.h>
+
+//OutPut assignments
+const int buzzer = 5;
+const int redMood = 9;
+const int greenMood = 10;
+const int blueMood = 11;
+const int redLED = 12;
+const int blueLED = 13;
+
+//Input assignments
+//Constant Values
+const int button = 2;
+const int tempDHT = 4;
+const int rotateDial = A0;
+const int lightSensor = A1;
+const int tempLM = A2;
+DHT dht(tempDHT, DHT11);
+
+//Variable Assignments.
+const int wait = 1000;
+const int lightMax = 0;
+const int tempMax = 30;
+
+//Printed Values
+float tempOut;
+float tempIn;
+float humidIn;
+int lightValue;
+
+void setup(){
+  // Arduino Functionality
+  Serial.begin(9600);
+  dht.begin();
+
+  // Output PinModes
+  pinMode(redLED, OUTPUT);
+  pinMode(blueLED, OUTPUT);
+  pinMode(blueMood, OUTPUT);
+  pinMode(redMood, OUTPUT);
+  pinMode(greenMood, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+
+// Input PinModes
+  pinMode(tempLM, INPUT);
+  pinMode(tempDHT, INPUT);
+  pinMode(lightSensor, INPUT);
+  pinMode(rotateDial, INPUT);
+  pinMode(button, INPUT);
+}
+
+void loop(){
+  tempReader();
+  redToggle();
+  lightThreshold();
+  tempThreshold();
+  moodLighting();
+}
+
+//Method 1 + 2 - Prints all the values given from LM35 and DHT11 sensors.
+void tempReader(){
+
+  tempOut = analogRead(tempLM);
+  tempIn = dht.readTemperature();
+  humidIn = dht.readHumidity();
+
+  Serial.print("Inside Humidity (%) = ");
+  Serial.println(humidIn);
+  Serial.print("Inside Temp (C) = ");
+  Serial.println(tempIn);
+  Serial.print("Outside Temp (C) = ");
+  Serial.println(tempOut);
+  delay(wait);
+  
+}
+
+//Method 3 - Toggles Red light on and off with button presses.
+void redToggle(){
+
+      if(digitalRead(button) == LOW)
+      {
+              if(digitalRead(redLED) == LOW)
+              {
+                digitalWrite(redLED, HIGH);
+              }
+           else
+           {
+                 digitalWrite(redLED, LOW);
+            }
+      }
+}
+//Method 4 + 5 - reads the current light value, if over max turn blue light off (After 10 seconds). If under Max turn blue light On.
+void lightThreshold(){
+
+  lightValue = digitalRead(lightSensor);
+  
+    if(lightValue > lightMax)
+    {
+        if(digitalRead(blueLED) == HIGH)
+        {
+          delay(wait * 2); // Set to two seconds for testing. Usually 10
+          digitalWrite(blueLED, LOW);
+        }   
+    }
+    else{
+          digitalWrite(blueLED, HIGH);
+    }
+}
+
+  
+
+//Method 6 - If the inside temperature (The house) reaches a certain level the buzzer will go off.
+void tempThreshold(){
+  tempIn = dht.readTemperature();
+  if(tempIn >= tempMax)
+  {
+    tone(buzzer, 1000,50);
+    delay(wait / 2);
+    tone(buzzer, 2000, 100);
+  }
+  else{
+    // Do Nothing.
+  }
+  
+}
+// Method 7 - Sets the RGB lights with the Rotating Switch in order to allow the Rotator to switch between the different colors.
+void moodLighting(){
+int dimmer = 1;
+int data = analogRead(rotateDial);
+data = data / 300;
+
+  switch (data){
+    case 1:
+           digitalWrite(redMood, dimmer);
+           digitalWrite(greenMood, LOW);
+           digitalWrite(blueMood, LOW);
+           break;
+    case 2:
+           digitalWrite(redMood, LOW);
+           digitalWrite(greenMood, dimmer);
+           digitalWrite(blueMood, LOW);
+           break;
+    case 3:
+           digitalWrite(redMood, LOW);
+           digitalWrite(greenMood, LOW);
+           digitalWrite(blueMood, dimmer);
+           break;
+    default:
+           digitalWrite(redMood, LOW);
+           digitalWrite(greenMood, LOW);
+           digitalWrite(blueMood, LOW);
+           break;
+  }
+}
+
+

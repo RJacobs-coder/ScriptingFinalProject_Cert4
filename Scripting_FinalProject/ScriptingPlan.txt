@@ -1,0 +1,32 @@
+Question 1 - Lab 18
+Question 2 - Lab 16
+Question 3 - lab 5
+Question 4 - lab 10
+Question 5 - lab 15
+Question 6 - lab 9, 17, 18
+Question 7 - lab 13
+
+Libraries -
+DHT library
+
+Variables - 
+int delay = 1000;
+int lightMax;
+int tempMax = 26; (DHT sensor)
+int data = readRotation;
+dataSwitch = data / 300;
+boolean buzzerOn;
+boolean buttonToggle;
+
+
+outputs being used - 
+
+redLED - D12
+blueLED - D13
+RGB blue - D9
+RGB red - D10
+RGB green - D11
+LM35 temp sensor - A2
+DHT11 temp / humid sensor - D4
+light sensor - A1
+rotation dial - A0
